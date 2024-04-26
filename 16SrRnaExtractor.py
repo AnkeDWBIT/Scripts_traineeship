@@ -8,8 +8,7 @@ import os
 output_handle=open("rRNAs.fa","w")
 
 # Specify the input directory
-input_directory = sys.argv[1]
-
+input_directory = "/home/guest/BIT11_Traineeship/Paeruginosa_refseq_genomes/ncbi_dataset/data"
 sixteen_s_records=[]
 for gbff_file in os.listdir(input_directory):
 	if os.path.isfile(os.path.join(input_directory, gbff_file)):
