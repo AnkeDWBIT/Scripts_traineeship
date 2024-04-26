@@ -30,7 +30,7 @@ if ! touch "$outputfile"; then
     exit 1
 fi
 
-# Use find to list all files in the input directory, exclude the script itself, and write their full paths to the output file
-find "$inputdirectory" -type f ! -name "$(basename "$0")" -exec readlink -f {} + > "$outputfile"
+# Use find to list all fasta files (extension .fna) in the input directory, exclude the script itself, and write their full paths to the output file
+find "$inputdirectory" -type f -name '*.fna' ! -name "$(basename "$0")" -exec readlink -f {} + > "$outputfile"
 
 echo "File paths written to $outputfile successfully."
