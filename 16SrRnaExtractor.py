@@ -34,14 +34,14 @@ for root, dirs, files in os.walk(input_directory):
 	for file in files:
 		if file.endswith(".gbff"):
 			name = os.path.splitext(os.path.basename(file))[0]
-			gbff_file = os.path.join(input_directory,name, file)
+			gbff_file = os.path.join(input_directory,name,file)
 			with open(gbff_file, 'r') as gbff:
 				for record in SeqIO.parse(gbff, 'genbank'):
 					for feature in record.features:
 						if(feature.type == "rRNA"):
 							if '16S ribosomal RNA' in feature.qualifiers['product'][0]:
 								sequence = feature.extract(record.seq)
-								if (len(sequence) <= 1604) and (len(sequence) > 1451):
+								if (len(sequence) <= 1614) and (len(sequence) > 1460):
 									sixteen_s_records.append(SeqRecord(sequence, id=f"{name}_16S_{record.id}", description=""))
 
 SeqIO.write(sixteen_s_records, output_handle, "fasta")
