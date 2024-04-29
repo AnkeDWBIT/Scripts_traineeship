@@ -57,5 +57,8 @@ for list in fastani_matrix:
 for col_num, refseq_id in enumerate(RefSeq_IDs, start=1):
     ws.write(0, col_num, refseq_id)
 
+# Auto adjust column-width
+ws.autofit()
+
 # Save the workbook
 wb.close()
