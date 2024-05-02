@@ -9,7 +9,7 @@ output_handle=open("rRNAs.fa","w")
 
 # Specify the input directory
 #input_directory = input("Specify the input directory: ")
-input_directory = "/home/guest/BIT11_Traineeship/Paeruginosa_refseq_genomes/ncbi_dataset/data/"
+input_directory = "/home/guest/BIT11_Traineeship/01_Paeruginosa_refseq_genomes/ncbi_dataset/data/"
 
 """
 # Renaming the .gfff files by adding the refseq accession
@@ -41,7 +41,7 @@ for root, dirs, files in os.walk(input_directory):
 						if(feature.type == "rRNA"):
 							if '16S ribosomal RNA' in feature.qualifiers['product'][0]:
 								sequence = feature.extract(record.seq)
-								if (len(sequence) <= 1614) and (len(sequence) > 1460):
+								if (len(sequence) <= 1600) and (len(sequence) > 1400):
 									sixteen_s_records.append(SeqRecord(sequence, id=f"{name}_16S_{record.id}", description=""))
 
 SeqIO.write(sixteen_s_records, output_handle, "fasta")
