@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# Script to rename .gbff files to RefSeq identifier & extract 16S rRNA sequences from .gbff files
+
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 import sys
