@@ -53,7 +53,7 @@ for list in fastani_matrix:
 #species = input("What is the target species (_ as delimiter, for example Pseudomonas_aeruginosa): ")
 #species = "Pseudomonas_aeruginosa"
 file_name = "FastANI_matrix_"+ species +".xlsx"
-wb = xlsxwriter.Workbook(file_name, {'strings_to_numbers': True})
+wb = xlsxwriter.Workbook(file_name, {'strings_to_numbers': True} )
 ws = wb.add_worksheet(species)
 
 # Add each item of the matrix in a cell of the excel worksheet
