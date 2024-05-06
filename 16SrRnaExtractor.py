@@ -7,12 +7,27 @@ import os
 
 output_handle=open("rRNAs.fa","w")
 
+# STEP 1 : Checking the command line arguments
+############################################################################################################
+# Check if any command-line arguments have been provided
+if len(sys.argv) < 1:
+    print("Error: Need to provide a command-line argument.")
+    print("Usage: python scriptname.py [1]")
+    print("\t[1] = Full path to directory with .gbff files to extract 16S rRNA sequences from")
+    sys.exit(1)
+
+# Store the command-line argument(s) in an object
+input_directory = sys.argv[1]
+
 # Specify the input directory
 #input_directory = input("Specify the input directory: ")
-input_directory = "/home/guest/BIT11_Traineeship/01_Paeruginosa_refseq_genomes/ncbi_dataset/data/"
+#input_directory = "/home/guest/BIT11_Traineeship/01_Paeruginosa_refseq_genomes/ncbi_dataset/data/"
+
+
+# STEP 2 : Renaming the .gbff files by adding the refseq accession
+############################################################################################################
 
 """
-# Renaming the .gfff files by adding the refseq accession
 # Iterate over subdirectories
 for subdir in os.listdir(input_directory):
 	subdir_path = os.path.join(input_directory, subdir)
@@ -27,7 +42,9 @@ for subdir in os.listdir(input_directory):
 				os.rename(os.path.join(subdir_path, filename), new_filename)
 """
 
-# Create a file containing all 16S rRNA sequences
+# STEP 3 : Create a file containing all 16S rRNA sequences
+############################################################################################################
+
 sixteen_s_records=[]
 
 for root, dirs, files in os.walk(input_directory):
