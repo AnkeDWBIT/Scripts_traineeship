@@ -1,17 +1,36 @@
 #!/usr/bin/env python
 # Script to write ANI & MLST results to excel
 # First worksheet is a full ANI matrix, second worksheet contains the strain types assigned by MLST
+import sys
 import xlsxwriter
 import os
 import json
 import re
 
-#STEP 1 : adding the original FastANI matrix to an Excel file
+# STEP 1 : checking the command line arguments
+############################################################################################################
+# Check if any command-line arguments have been provided
+if len(sys.argv) < 3:
+    print("Error: Need to provide the correct command-line arguments.")
+    print("Usage: python scriptname.py [1] [2] [3]")
+    print("\t[1] = Full path to FastANI matrix output file")
+    print("\t[2] = Target species (_ as delimiter, e.g. Pseudomonas_aeruginosa)")
+    print("\t[3] = Full path to directory with JSON files from MLST")
+    sys.exit(1)
+
+# Store command-line argument(s) in objects
+file_path = sys.argv[1]
+species = sys.argv[2]
+mlst_results_dir = sys.argv[3]
+
+
+
+#STEP 2 : adding the original FastANI matrix to an Excel file
 ############################################################################################################
 
 # Opening & reading the FastANI matrix from the output file
 #file_path = input("Location to the FastANI matrix: ")
-file_path = "/home/guest/BIT11_Traineeship/03_FastANI/fastANI_subset5.matrix"
+#file_path = "/home/guest/BIT11_Traineeship/03_FastANI/fastANI_subset5.matrix"
 
 with open(file_path) as file:
     lines = file.readlines()
@@ -26,15 +45,15 @@ for line in lines:
 # Remove the first row (contains amount of sequences)
 del(fastani_matrix[0])
 
-# Replace path to the genomic-fasta-file to the RefSeq-identifier (e.g. GCF_000168335.1)
+# Replace path to the genomic-fasta-file by the RefSeq-identifier (e.g. GCF_000168335.1)
 for list in fastani_matrix:
     list[0] = list[0].split('/')[-2]
             
 # Initialize Excel Workbook, & add a worksheet
 #species = input("What is the target species (_ as delimiter, for example Pseudomonas_aeruginosa): ")
-species = "Pseudomonas_aeruginosa"
+#species = "Pseudomonas_aeruginosa"
 file_name = "FastANI_matrix_"+ species +".xlsx"
-wb = xlsxwriter.Workbook(file_name)
+wb = xlsxwriter.Workbook(file_name, {'strings_to_numbers': True})
 ws = wb.add_worksheet(species)
 
 # Add each item of the matrix in a cell of the excel worksheet
@@ -44,7 +63,7 @@ for row_num, row_data in enumerate(fastani_matrix):
 
 
 
-#STEP 2 : mirroring the martrix diagonally to construc a full matrix
+#STEP 3 : mirroring the martrix diagonally to construc a full matrix
 ############################################################################################################
 
 # Only retain ANI-values in the lists (= remove RefSeq-ID and value 100)
@@ -64,12 +83,12 @@ for col_num, refseq_id in enumerate(RefSeq_IDs, start=1):
     ws.write(0, col_num, refseq_id)
     
 
-# STEP 3 : add strain types (ST) assigned by the MLST tool to a new worksheet in the excel file
+# STEP 4 : add strain types (ST) assigned by the MLST tool to a new worksheet in the excel file
 ############################################################################################################
 ws2 = wb.add_worksheet("MLST")  
 
 #mlst_results_dir = input("Location to the JSON files from MLST analysis: ")
-mlst_results_dir = "/home/guest/BIT11_Traineeship/04_MLST/mlst/"
+#mlst_results_dir = "/home/guest/BIT11_Traineeship/04_MLST/mlst/mlst_output/"
 
 # Write column headers
 ws2.write(0, 1, "ST")  # Write ST at row 0, column 1
