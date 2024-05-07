@@ -42,16 +42,15 @@ with open(file_path, 'a') as file:
                 if "short_summary" in filename and filename.endswith(".json"):
                     # Parse out the RefSeq identifier for later use
                     refseq_id = filename.split('.')[-4]
-                    print(refseq_id)
                     # Contstruct paths to the JSON short summary files
                     short_summary_path = os.path.join(subdir_path, filename)
-                    print(short_summary_path)
+                    #print(short_summary_path)
                     # Open the JSON files and read the data
                     with open(short_summary_path) as f:
                         data = json.load(f)
                         # Retrieve one_line_summary from the JSON file
                         onelinesum = data['results']['one_line_summary']
-                        print(onelinesum)
+                        #print(onelinesum)
                         # Write data to the text file
                         file.write(f"{refseq_id}\t{onelinesum}\n")
                         # Close the JSON file
