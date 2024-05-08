@@ -47,7 +47,10 @@ del(fastani_matrix[0])
 
 # Replace path to the genomic-fasta-file by the RefSeq-identifier (e.g. GCF_000168335.1)
 for list in fastani_matrix:
-    list[0] = list[0].split('/')[-2]
+    list[0] = list[0].split('/')[-1]
+    list[0] = list[0].split('_')[:2]
+    list[0] = "_".join(list[0])
+    
             
 # Initialize Excel Workbook, & add a worksheet
 #species = input("What is the target species (_ as delimiter, for example Pseudomonas_aeruginosa): ")
@@ -80,8 +83,7 @@ RefSeq_IDs = []
 for list in fastani_matrix:
     RefSeq_IDs.append(list[0])  
 for col_num, refseq_id in enumerate(RefSeq_IDs, start=1):
-    ws.write(0, col_num, refseq_id)
-    
+    ws.write(0, col_num, refseq_id)   
 
 # STEP 4 : add strain types (ST) assigned by the MLST tool to a new worksheet in the excel file
 ############################################################################################################
