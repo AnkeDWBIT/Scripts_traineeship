@@ -10,13 +10,19 @@ import itertools
 if len(sys.argv) < 2:
 	print("Error: Need to provide the correct command-line arguments.")
 	print("Usage: python scriptname.py [1] ...")
-	print("\t[1] ... = Specify one or more strain types (ST) (e.g. 262 1076), all genomes of those STs will be selected from the Excel file)")
+	print("\t[1] ... = Specify one or more strain types (ST) (e.g. 262 1076 Unknown), all genomes of those STs will be selected from the Excel file)")
 	sys.exit(1)
 
 # Store command-line argument(s) (=ST) as an integer in a list
 ST_input = []
 for arg in sys.argv[1:]:
-    ST_input.append(int(arg))
+    if arg.isdigit():
+        ST_input.append(int(arg))
+    else:
+        if arg =="Unknown":
+            ST_input.append(arg)
+        else:
+             print("Error: Did you mean \"Unknown\" instead of", arg,"?")
 
 # Load the workbook
 excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa (another copy).xlsx"
