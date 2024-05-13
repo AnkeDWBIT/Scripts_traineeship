@@ -1,9 +1,20 @@
 #!/usr/bin/env python
 # Script to make a new excel worksheet with a subset FastANI matrix based on the ANI results of one ST from an Excel file
 import pandas as pd
+import sys
 from openpyxl import Workbook
 from openpyxl import load_workbook
 import itertools
+
+# Check if any command-line arguments have been provided
+if len(sys.argv) < 1:
+	print("Error: Need to provide the correct command-line arguments.")
+	print("Usage: python scriptname.py [1]")
+	print("\t[1] = Specify ST value (e.g. 262) to select genomes with that ST from the Excel file")
+	sys.exit(1)
+
+# Store command-line argument as an integer
+ST_input = int(sys.argv[1])
 
 # Load the workbook
 excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa (another copy).xlsx"
@@ -30,7 +41,7 @@ for row in range(2, ws_MLST.max_row + 1):
 # Make a list of all GCF values in the dictionary of an ST (will be used for the subset ANI matrix)
 GCF = []
 for key, value in ST_dict.items():
-    if key == 262:
+    if key == ST_input:
         GCF.extend(value)
 
 # Make a new worksheet for the subset ANI matrix
