@@ -5,8 +5,8 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 import itertools
 
-#Load the workbook
-excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa.xlsx"
+# Load the workbook
+excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa (another copy).xlsx"
 wb = load_workbook(excel_file_path)
 
 # Select the worksheet named "MLST" & "Pseudomonas_aeruginosa"
@@ -15,7 +15,7 @@ ws_ANI=wb["Pseudomonas_aeruginosa"]
 
 # Make a dictionary with the STs as key and GCFs as values
 ST_dict = {}
-for row in range(2, ws_MLST.max_row + 1):  # Assuming row 1 is header
+for row in range(2, ws_MLST.max_row + 1):
     ST = ws_MLST.cell(row=row, column=2).value
     genome = ws_MLST.cell(row=row, column=1).value
     if ST in ST_dict:
@@ -33,19 +33,33 @@ for key, value in ST_dict.items():
     if key == 262:
         GCF.extend(value)
 
-# Make a new worksheet in the Excel file to make a subset ANI matrix
-ws_subset = wb.create_sheet("Subset_ANI_matrix")
+# Make a new worksheet for the subset ANI matrix
+ws_ANI_subset = wb.create_sheet("Subset_ANI_matrix")
+
+# Make a new worksheet for the subset MLST results (that were used for the subset ANI matrix)
+ws_MLST_subset = wb.create_sheet("Subset_MLST_results")
+# Write column headers
+ws_MLST_subset.cell(row=1, column=1, value="RefSeq ID")
+ws_MLST_subset.cell(row=1, column=2, value="ST")
         
-# Write RefSeq identifiers from the GCF list to the new worksheet as row & column headers
+# Write RefSeq identifiers from the GCF list to the new worksheets (ws_ANI_subset & ws_MLST_subset) & write the STs to the ws_MLST_subset worksheet
 GCF_index = 0
-header_row = 2
-header_column = 2
+index = 2
 for genome in GCF:
-    ws_subset.cell(row=header_row, column=1, value=genome)
-    ws_subset.cell(row=1, column=header_column, value=genome)
-    GCF_index += 1
-    header_row += 1
-    header_column += 1
+    # Write the RefSeq ID as column and row headers to the ws_ANI_subset worksheet
+    ws_ANI_subset.cell(row=index, column=1, value=genome)
+    ws_ANI_subset.cell(row=1, column=index, value=genome)
+    # Write the RefSeq ID as row header to the ws_MLST_subset worksheet
+    ws_MLST_subset.cell(row=index, column=1, value=genome)
+    # Write the STs of the genomes in the GCF list to the ws_MLST_subset worksheet
+    for row in range(1, ws_MLST.max_row + 1):
+        genome_MLST = ws_MLST.cell(row=row, column=1).value
+        if genome_MLST == genome:
+            ST = ws_MLST.cell(row=row, column=2).value
+            if genome_MLST in GCF:
+                ws_MLST_subset.cell(row=index, column=2, value=ST)
+                GCF_index += 1
+                index += 1
 
 # Make all possible combinations of the genomes in the list
 for genome_pair in itertools.product(GCF, GCF):
@@ -60,14 +74,14 @@ for genome_pair in itertools.product(GCF, GCF):
     ANI_value = ws_ANI.cell(row_index, col_index).value
     #print(genome_pair[0], genome_pair[1], ANI_value)
     # Extract the column - & row index of the genomes in the subset ANI matrix
-    for row in range(2, ws_subset.max_row+1):
-        if ws_subset.cell(row, 1).value == genome_pair[0]:
+    for row in range(2, ws_ANI_subset.max_row+1):
+        if ws_ANI_subset.cell(row, 1).value == genome_pair[0]:
             row_index_subset = row
-    for col in range(2, ws_subset.max_row+1):
-        if ws_subset.cell(1, col).value == genome_pair[1]:
+    for col in range(2, ws_ANI_subset.max_row+1):
+        if ws_ANI_subset.cell(1, col).value == genome_pair[1]:
             col_index_subset = col
     # Write the ANI-value to the new worksheet
-    ws_subset.cell(row_index_subset, col_index_subset, value=ANI_value)
+    ws_ANI_subset.cell(row_index_subset, col_index_subset, value=ANI_value)
 
 # Save & close the workbook
 wb.save(excel_file_path)
