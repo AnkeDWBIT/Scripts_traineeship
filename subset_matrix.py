@@ -7,14 +7,16 @@ from openpyxl import load_workbook
 import itertools
 
 # Check if any command-line arguments have been provided
-if len(sys.argv) < 1:
+if len(sys.argv) < 2:
 	print("Error: Need to provide the correct command-line arguments.")
-	print("Usage: python scriptname.py [1]")
-	print("\t[1] = Specify ST value (e.g. 262) to select genomes with that ST from the Excel file")
+	print("Usage: python scriptname.py [1] ...")
+	print("\t[1] ... = Specify one or more strain types (ST) (e.g. 262 1076), all genomes of those STs will be selected from the Excel file)")
 	sys.exit(1)
 
-# Store command-line argument as an integer
-ST_input = int(sys.argv[1])
+# Store command-line argument(s) (=ST) as an integer in a list
+ST_input = []
+for arg in sys.argv[1:]:
+    ST_input.append(int(arg))
 
 # Load the workbook
 excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa (another copy).xlsx"
@@ -38,11 +40,11 @@ for row in range(2, ws_MLST.max_row + 1):
 #GCF = ["GCF_033392255.1","GCF_013255565.1","GCF_001632245.1","GCF_030444495.1","GCF_029961345.1",
        #"GCF_027359235.1","GCF_019857465.1","GCF_036232165.1","GCF_030121895.1","GCF_021266605.1"]
         
-# Make a list of all GCF values in the dictionary of an ST (will be used for the subset ANI matrix)
+# Make a list of all GCF values in the dictionary of the STs that were given as input (these genomes will be used for the subset ANI matrix)
 GCF = []
 for key, value in ST_dict.items():
-    if key == ST_input:
-        GCF.extend(value)
+     if key in ST_input:
+         GCF.extend(value)
 
 # Make a new worksheet for the subset ANI matrix
 ws_ANI_subset = wb.create_sheet("Subset_ANI_matrix")
