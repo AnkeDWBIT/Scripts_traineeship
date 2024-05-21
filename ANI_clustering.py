@@ -1,17 +1,36 @@
+import sys
 import pandas as pd
 from sklearn.cluster import AgglomerativeClustering
 from openpyxl import load_workbook
 
+# PROCESS INPUT ARGUMENTS
+######################################################################################################################################
+# Check if any command-line arguments have been provided
+if len(sys.argv) < 3:
+    print("Error: Need to provide the correct command-line arguments.")
+    print("Usage: python scriptname.py [1] [2] [3] ...")
+    print("\t[1] = Full path to FastANI matrix output file)")
+    print("\t[2] = Name of the worksheet in the Excel file with the ANI results e.g. Pseudomonas_aeruginosa")
+    print("\t[3] = Values to test for the distance threshold (e.g. 0.5 0.05)")
+    sys.exit(1)
+
+# Store command-line argument(s) (=ST) as an integer in a list
+excel_file_path = sys.argv[1]
+sheet_name = sys.argv[2]
+values_range = sys.argv[3:]
+
+# Store the values_range as floats
+values_range = [float(i) for i in values_range]
+
 # LOAD THE ANI & MLST DATA FROM THE EXCEL FILE  
 ######################################################################################################################################
-excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa (another copy).xlsx"
+excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_anothercopy.xlsx"
 sheet_name = "Pseudomonas_aeruginosa"
 # Load the workbook
 wb = load_workbook(excel_file_path)
 # Select the worksheet with MLST and ANI results
 ws_MLST=wb["MLST"]
 ws_ANI=wb[sheet_name]
-
 
 # MAKE A NEW WORKSHEET WHERE ORDER OF THE MLST RESULTS MATCH THE GENOME ORDER IN THE ANI MATRIX
 ######################################################################################################################################
@@ -46,10 +65,10 @@ distance_matrix = 100 - percent_identity_matrix
 # Find the best value for the distance threshold by testing a range of values
 col = 3
 """
-for value in range(5, 0, -1):
-    value = value/10
+#for value in range(5, 0, -1):
+    #values_range = value/10
 """
-values_range = [0.5, 0.05]
+#values_range = [0.5, 0.05]
 for value in values_range:
     clustering = AgglomerativeClustering(metric='precomputed', linkage='average', distance_threshold=value, n_clusters=None)
     clustering.fit(distance_matrix)
@@ -68,3 +87,7 @@ for value in values_range:
 # Save & close the workbook
 wb.save(excel_file_path)
 wb.close()
+
+# MESSAGE WHEN SCRIPT IS FINISHED
+######################################################################################################################################
+print("Script finished.\nANI clustering results have been added to the specified Excel file on worsheet 'MLST_ordered'.\nThe distance threshold values tested were: ", values_range)
