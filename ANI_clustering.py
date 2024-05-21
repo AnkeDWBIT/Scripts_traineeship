@@ -1,3 +1,8 @@
+#!/usr/bin/env python
+# Script to perform Single-Linkage Agglomerative Clustering of ANI (distance) values with different values for distance_threshold
+# New worksheet (MLST_ordered) where MLST results are ordered to match the order of the genomes in the ANI matrix
+# Clustering results are written to this new worksheet (one column per tested distance_threshold value)
+import pandas as pd
 import sys
 import pandas as pd
 from sklearn.cluster import AgglomerativeClustering
@@ -9,28 +14,31 @@ from openpyxl import load_workbook
 if len(sys.argv) < 3:
     print("Error: Need to provide the correct command-line arguments.")
     print("Usage: python scriptname.py [1] [2] [3] ...")
-    print("\t[1] = Full path to FastANI matrix output file)")
-    print("\t[2] = Name of the worksheet in the Excel file with the ANI results e.g. Pseudomonas_aeruginosa")
-    print("\t[3] = Values to test for the distance threshold (e.g. 0.5 0.05)")
+    print("\t[1] = Full path to Excel file with ANI matrix and MLST results")
+    print("\t[2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa")
+    print("\t[3] = Worksheet with MLST results in Excel file [1] e.g. MLST")
+    print("\t[4] = Values to test for the distance threshold (e.g. 0.5 0.05)")
     sys.exit(1)
 
 # Store command-line argument(s) (=ST) as an integer in a list
 excel_file_path = sys.argv[1]
-sheet_name = sys.argv[2]
-values_range = sys.argv[3:]
+ANI_sheet_name = sys.argv[2]
+MLST_sheet_name = sys.argv[3]
+values_range = sys.argv[4:]
 
 # Store the values_range as floats
 values_range = [float(i) for i in values_range]
 
 # LOAD THE ANI & MLST DATA FROM THE EXCEL FILE  
 ######################################################################################################################################
-excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_anothercopy.xlsx"
-sheet_name = "Pseudomonas_aeruginosa"
+#excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_anothercopy.xlsx"
+#ANI_sheet_name = "Pseudomonas_aeruginosa"
+#MLST_sheet_name = "MLST"
 # Load the workbook
 wb = load_workbook(excel_file_path)
 # Select the worksheet with MLST and ANI results
-ws_MLST=wb["MLST"]
-ws_ANI=wb[sheet_name]
+ws_MLST=wb["Subset_MLST_results1"]
+ws_ANI=wb[ANI_sheet_name]
 
 # MAKE A NEW WORKSHEET WHERE ORDER OF THE MLST RESULTS MATCH THE GENOME ORDER IN THE ANI MATRIX
 ######################################################################################################################################
@@ -56,7 +64,7 @@ for ANI_row in range(2, ws_ANI.max_row + 1):
 # WRITE RESULTS TO EXCEL AND COMPARE PER GENOME IF ANI CLUSTER & MLST TYPE CORRESPOND
 ######################################################################################################################################
 # Load the percent identity matrix from an Excel file into a dataframe
-percent_identity_df = pd.read_excel(excel_file_path, sheet_name=sheet_name, index_col=0)
+percent_identity_df = pd.read_excel(excel_file_path, sheet_name=ANI_sheet_name, index_col=0)
 # Convert the DataFrame to a Numpy array & Convert percent identity to distance (assuming values are in percentage form)
 percent_identity_matrix = percent_identity_df.to_numpy()
 distance_matrix = 100 - percent_identity_matrix
@@ -64,10 +72,8 @@ distance_matrix = 100 - percent_identity_matrix
 # Perform agglomerative clustering
 # Find the best value for the distance threshold by testing a range of values
 col = 3
-"""
 #for value in range(5, 0, -1):
     #values_range = value/10
-"""
 #values_range = [0.5, 0.05]
 for value in values_range:
     clustering = AgglomerativeClustering(metric='precomputed', linkage='average', distance_threshold=value, n_clusters=None)
