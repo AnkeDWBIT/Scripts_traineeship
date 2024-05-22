@@ -11,16 +11,16 @@ from openpyxl import load_workbook
 # PROCESS INPUT ARGUMENTS
 ######################################################################################################################################
 # Check if any command-line arguments have been provided
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
     print("Error: Need to provide the correct command-line arguments.")
-    print("Usage: python scriptname.py [1] [2] [3] ...")
+    print("Usage: python scriptname.py [1] [2] [3] [4] ...")
     print("\t[1] = Full path to Excel file with ANI matrix and MLST results")
-    print("\t[2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa")
-    print("\t[3] = Worksheet with MLST results in Excel file [1] e.g. MLST")
-    print("\t[4] = Values to test for the distance threshold (e.g. 0.5 0.05)")
+    print("\t[2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa or ANI_matrix_reviewed")
+    print("\t[3] = Worksheet with MLST results in Excel file [1] e.g. MLST or MLST_reviewed")
+    print("\t[4] ... = Values to test for the distance threshold (e.g. 0.5 0.05)")
     sys.exit(1)
 
-# Store command-line argument(s) (=ST) as an integer in a list
+# Store command-line arguments
 excel_file_path = sys.argv[1]
 ANI_sheet_name = sys.argv[2]
 MLST_sheet_name = sys.argv[3]
@@ -31,22 +31,22 @@ values_range = [float(i) for i in values_range]
 
 # LOAD THE ANI & MLST DATA FROM THE EXCEL FILE  
 ######################################################################################################################################
-#excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_anothercopy.xlsx"
+#excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_copy.xlsx"
 #ANI_sheet_name = "Pseudomonas_aeruginosa"
 #MLST_sheet_name = "MLST"
 # Load the workbook
 wb = load_workbook(excel_file_path)
 # Select the worksheet with MLST and ANI results
-ws_MLST=wb["Subset_MLST_results1"]
+ws_MLST=wb[MLST_sheet_name]
 ws_ANI=wb[ANI_sheet_name]
 
 # MAKE A NEW WORKSHEET WHERE ORDER OF THE MLST RESULTS MATCH THE GENOME ORDER IN THE ANI MATRIX
 ######################################################################################################################################
-# Make a new worksheet for the ordered MLST results
-ws_MLST_ordered = wb.create_sheet("MLST_ordered")
+# Make a new worksheet for the ordered MLST results (& later for the clustered ANI values)
+ws_ord_clus = wb.create_sheet("Ordered_Clustered")
 # Write column headers
-ws_MLST_ordered.cell(row=1, column=1, value="RefSeq ID")
-ws_MLST_ordered.cell(row=1, column=2, value="ST")
+ws_ord_clus.cell(row=1, column=1, value="RefSeq ID")
+ws_ord_clus.cell(row=1, column=2, value="ST")
 
 # In a new worksheet, paste the genomes as orderd in ws_ANI and the corresponding MLST type from ws_MLST
 for ANI_row in range(2, ws_ANI.max_row + 1):
@@ -56,8 +56,8 @@ for ANI_row in range(2, ws_ANI.max_row + 1):
         MLST_genome = ws_MLST.cell(row=MLST_row, column=1).value
         # If ANI_genome and MLST_genome are the same, write the genome
         if ANI_genome == MLST_genome:
-            ws_MLST_ordered.cell(row=ANI_row, column=1, value=ANI_genome)
-            ws_MLST_ordered.cell(row=ANI_row, column=2, value=ws_MLST.cell(MLST_row,2).value)
+            ws_ord_clus.cell(row=ANI_row, column=1, value=ANI_genome)
+            ws_ord_clus.cell(row=ANI_row, column=2, value=ws_MLST.cell(MLST_row,2).value)
 
          
 # AGGLOMERATIVE CLUSTERING OF ANI VALUES
@@ -81,12 +81,12 @@ for value in values_range:
     # Get the cluster labels
     labels = clustering.labels_
     #print("ANI cluster labels (using distance_threshold = ", value, ")", labels)
-    # Add the labels from the Agglomerative clustering of ANI values to the ws_MLST_ordered worksheet staring form row 2, column 3
+    # Add the labels from the Agglomerative clustering of ANI values to the ws_ord_clus worksheet staring form row 2, column 3
     header = "ANI cluster (distance_threshold = " + str(value) + ")"
-    ws_MLST_ordered.cell(row=1, column=col, value=header)
+    ws_ord_clus.cell(row=1, column=col, value=header)
     index = 2
     for label in labels:
-        ws_MLST_ordered.cell(row=index, column=col, value=label)
+        ws_ord_clus.cell(row=index, column=col, value=label)
         index += 1
     col += 1
 
@@ -96,4 +96,4 @@ wb.close()
 
 # MESSAGE WHEN SCRIPT IS FINISHED
 ######################################################################################################################################
-print("Script finished.\nANI clustering results have been added to the specified Excel file on worsheet 'MLST_ordered'.\nThe distance threshold values tested were: ", values_range)
+print("Script finished.\nANI clustering results have been added to the specified Excel file on worsheet 'Ordered_Clustered'.\nThe distance threshold values tested were: ", values_range)
