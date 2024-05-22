@@ -27,7 +27,7 @@ MLST_sheet_name = sys.argv[3]
 # LOAD THE ANI MATRIX FROM THE EXCEL FILE  
 ######################################################################################################################################
 # Load the workbook
-#excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_4thcopy.xlsx"
+#excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_copy.xlsx"
 wb = load_workbook(excel_file_path)
 # Select the worksheet named "MLST" & "Pseudomonas_aeruginosa"
 ws_MLST=wb[MLST_sheet_name]
@@ -68,13 +68,19 @@ ws_ANI_reviewed = wb.create_sheet("ANI_matrix_reviewed")
 for row in ws_ANI.iter_rows(values_only=True):
     ws_ANI_reviewed.append(row)
     # If the genome name is a key in the dictionary, remove the row
-    for key, value in genomes_to_remove.items():
-         if key == row[0]:
-             ws_ANI_reviewed.delete_rows(ws_ANI_reviewed.max_row)
-             # If the genome name is in the dictionary, remove the column
-             for cell in row[1:]:
-                  if cell == row[0]:
-                      ws_ANI_reviewed.delete_cols(cell)
+    for key in genomes_to_remove.keys():
+        if key == row[0]:
+            ws_ANI_reviewed.delete_rows(ws_ANI_reviewed.max_row)
+
+# If the genome name is in the dictionary, remove the column
+cols_to_delete = []
+for col in ws_ANI_reviewed.iter_cols(min_row=1, max_row=1):
+    if col[0].value in genomes_to_remove:
+        cols_to_delete.append(col[0].col_idx)
+# Delete columns in reverse order to avoid messing up column indices during deletion
+for col_idx in sorted(cols_to_delete, reverse=True):
+    ws_ANI_reviewed.delete_cols(col_idx)
+
 
 # Make a new worksheet for the reviewed MLST results
 ws_MLST_reviewed = wb.create_sheet("MLST_reviewed")
