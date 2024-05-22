@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Script for quality control of ANI matrix
+# Script for quality control of ANI matrix and MLST results
 # Look for genomes that consistenly have a percent identity lower than 95 with all other genomes of the dataset (indicative of a diferent species)
 # Make new worksheet for ANI and MLST results where genomes with doubtful species identity are removed
 
