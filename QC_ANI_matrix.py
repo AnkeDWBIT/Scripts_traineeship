@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Script for quality control of ANI matrix and MLST results
+# Script for quality control based on ANI matrix
 # Look for genomes that consistenly have a percent identity lower than 95 with all other genomes of the dataset (indicative of a diferent species)
 # Make new worksheet for ANI and MLST results where genomes with doubtful species identity are removed
 
@@ -15,8 +15,8 @@ if len(sys.argv) < 3:
     print("Error: Need to provide the correct command-line arguments.")
     print("Usage: python scriptname.py [1] [2] [3]")
     print("\t[1] = Full path to Excel file with ANI matrix and MLST results")
-    print("\t[2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa")
-    print("\t[3] = Worksheet with MLST results in Excel file [1] e.g. MLST")
+    print("\t[2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa or ANI_matrix_reviewed")
+    print("\t[3] = Worksheet with MLST results in Excel file [1] e.g. MLST or MLST_reviewed")
     sys.exit(1)
 
 # Store command-line argumentS
@@ -29,7 +29,7 @@ MLST_sheet_name = sys.argv[3]
 # Load the workbook
 #excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_copy.xlsx"
 wb = load_workbook(excel_file_path)
-# Select the worksheet named "MLST" & "Pseudomonas_aeruginosa"
+# Select the worksheets with ANI and MLST results
 ws_MLST=wb[MLST_sheet_name]
 ws_ANI=wb[ANI_sheet_name]
 
@@ -38,7 +38,7 @@ ws_ANI=wb[ANI_sheet_name]
 # Iterate over each row in the matrix except row 1 (header row) and the first values in each row (header values)
 genomes_to_remove = {}
 for row in range(2, ws_ANI.max_row + 1):
-    # Look for rows where the average ANI value is below 0.95
+    # Look for rows where the average ANI value is below 95
     genome_name = ws_ANI.cell(row=row, column=1).value
     ani_values = [cell.value for cell in ws_ANI[row][2:]]  # Exclude the first cell
     avg_ANI = sum(ani_values) / len(ani_values)
