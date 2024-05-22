@@ -7,15 +7,21 @@ from openpyxl import load_workbook
 import itertools
 
 # Check if any command-line arguments have been provided
-if len(sys.argv) < 2:
-	print("Error: Need to provide the correct command-line arguments.")
-	print("Usage: python scriptname.py [1] ...")
-	print("\t[1] ... = Specify one or more strain types (ST) (e.g. 262 1076 Unknown), all genomes of those STs will be selected from the Excel file)")
-	sys.exit(1)
+if len(sys.argv) < 4:
+    print("Error: Need to provide the correct command-line arguments.")
+    print("Usage: python scriptname.py [1] [2] [3] [4] ...")
+    print("\t[1] = Full path to Excel file with ANI matrix and MLST results")
+    print("\t[2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa")
+    print("\t[3] = Worksheet with MLST results in Excel file [1] e.g. MLST")
+    print("\t[4] ... = Specify one or more strain types (ST) (e.g. 262 1076 Unknown), all genomes of those STs will be selected from the Excel file)")
+    sys.exit(1)
 
 # Store command-line argument(s) (=ST) as an integer in a list
+excel_file_path = sys.argv[1]
+ANI_sheet_name = sys.argv[2]
+MLST_sheet_name = sys.argv[3]
 ST_input = []
-for arg in sys.argv[1:]:
+for arg in sys.argv[4:]:
     if arg.isdigit():
         ST_input.append(int(arg))
     else:
@@ -25,12 +31,12 @@ for arg in sys.argv[1:]:
              print("Error: Did you mean \"Unknown\" instead of", arg,"?")
 
 # Load the workbook
-excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa (another copy).xlsx"
+#excel_file_path = "/home/guest/BIT11_Traineeship/Scripts_traineeship/FastANI_matrix_Pseudomonas_aeruginosa_copy.xlsx"
 wb = load_workbook(excel_file_path)
 
-# Select the worksheet named "MLST" & "Pseudomonas_aeruginosa"
-ws_MLST=wb["MLST"]
-ws_ANI=wb["Pseudomonas_aeruginosa"]
+# Select worksheets with MLST and ANI results
+ws_MLST=wb[MLST_sheet_name]
+ws_ANI=wb[ANI_sheet_name]
 
 # Make a dictionary with the STs as key and GCFs as values
 ST_dict = {}
@@ -45,7 +51,7 @@ for row in range(2, ws_MLST.max_row + 1):
 # List of genomes for the subset ANI matrix
 #GCF = ["GCF_033392255.1","GCF_013255565.1","GCF_001632245.1","GCF_030444495.1","GCF_029961345.1",
        #"GCF_027359235.1","GCF_019857465.1","GCF_036232165.1","GCF_030121895.1","GCF_021266605.1"]
-        
+   
 # Make a list of all GCF values in the dictionary of the STs that were given as input (these genomes will be used for the subset ANI matrix)
 GCF = []
 for key, value in ST_dict.items():
