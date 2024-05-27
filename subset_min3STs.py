@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-# Script to make new ANI & MLST excel worksheets that only contain genomes having and ST that occurs at least 3 times in the dataset
+# Script to make new ANI & MLST excel worksheets ("Subset_ANI_matrix_3STs" & "Subset_MLST_3STs") 
+# The subset consists of genomes that have an ST that occurs at least 3 times in the dataset
 from openpyxl import load_workbook
 import sys
 import itertools
@@ -7,7 +8,7 @@ import itertools
 # STEP 1 : HANDLE COMMAND-LINE ARGUMENTS
 ############################################################################################################
 # Check if any command-line arguments have been provided
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
     print("Error: Need to provide the correct command-line arguments.")
     print("Usage: python scriptname.py [1] [2] [3]")
     print("\t[1] = Full path to Excel file with ANI matrix and MLST results")
@@ -52,9 +53,11 @@ for value in ST_dict.values():
 ws_ANI_subset = wb.create_sheet("Subset_ANI_matrix_3STs")
 ws_MLST_subset = wb.create_sheet("Subset_MLST_3STs")
 # Write column headers to the new MLST worksheet
+ws_MLST_subset.append(["RefSeq ID", "ST"])
+"""
 ws_MLST_subset.cell(row=1, column=1, value="RefSeq ID")
 ws_MLST_subset.cell(row=1, column=2, value="ST")
-
+"""
 # Write RefSeq identifiers from the genomes list to the new worksheets & write the STs to the ws_MLST_subset worksheet
 GCF_index = 0
 index = 2
@@ -65,7 +68,7 @@ for genome in genomes:
     # Write the RefSeq ID as row header to the ws_MLST_subset worksheet
     ws_MLST_subset.cell(row=index, column=1, value=genome)
     # Write the STs of the genomes in the GCF list to the ws_MLST_subset worksheet
-    for row in range(1, ws_MLST.max_row + 1):
+    for row in range(2, ws_MLST.max_row + 1):
         genome_MLST = ws_MLST.cell(row=row, column=1).value
         if genome_MLST == genome:
             ST = ws_MLST.cell(row=row, column=2).value
@@ -74,26 +77,23 @@ for genome in genomes:
                 GCF_index += 1
                 index += 1
 
+# Pre-compute the indices of the genomes in the original ANI matrix
+genome_row_indices = {ws_ANI.cell(row, 1).value: row for row in range(2, ws_ANI.max_row + 1)}
+genome_col_indices = {ws_ANI.cell(1, col).value: col for col in range(2, ws_ANI.max_column + 1)}
+
+# Pre-compute the indices of the genomes in the subset ANI matrix
+subset_genome_row_indices = {ws_ANI_subset.cell(row, 1).value: row for row in range(2, ws_ANI_subset.max_row + 1)}
+subset_genome_col_indices = {ws_ANI_subset.cell(1, col).value: col for col in range(2, ws_ANI_subset.max_column + 1)}
+
 # Make all possible combinations of the genomes in the list
 for genome_pair in itertools.product(genomes, genomes):
-    # Extract the column- & row index of the genomes in the ANI matrix
-    for row in range(2, ws_ANI.max_row+1):
-            if (ws_ANI.cell(row, 1).value) == genome_pair[0]:
-                row_index = row
-    for col in range(2, ws_ANI.max_row+1):
-            if (ws_ANI.cell(1, col).value) == genome_pair[1]:
-                col_index = col           
-    # Find the ANI-value of the genome pair in the Excel file
+    # Extract the ANI value
+    row_index = genome_row_indices[genome_pair[0]]
+    col_index = genome_col_indices[genome_pair[1]]
     ANI_value = ws_ANI.cell(row_index, col_index).value
-    #print(genome_pair[0], genome_pair[1], ANI_value)
-    # Extract the column - & row index of the genomes in the subset ANI matrix
-    for row in range(2, ws_ANI_subset.max_row+1):
-        if ws_ANI_subset.cell(row, 1).value == genome_pair[0]:
-            row_index_subset = row
-    for col in range(2, ws_ANI_subset.max_row+1):
-        if ws_ANI_subset.cell(1, col).value == genome_pair[1]:
-            col_index_subset = col
     # Write the ANI-value to the new worksheet
+    row_index_subset = subset_genome_row_indices[genome_pair[0]]
+    col_index_subset = subset_genome_col_indices[genome_pair[1]]
     ws_ANI_subset.cell(row_index_subset, col_index_subset, value=ANI_value)
     
 
