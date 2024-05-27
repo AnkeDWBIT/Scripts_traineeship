@@ -139,6 +139,15 @@ $ python subset_matrix.py [1] [2] [3] [4] ...
 [3] = Worksheet with MLST results in Excel file [1] e.g. MLST or MLST_reviewed
 [4] ... = Specify one or more strain types (ST) (e.g. 262 1076 Unknown), all genomes of those STs will be selected from the Excel file
 ```
+#### subset_min3STs.py
+- In the Excel file, creates new worksheets "Subset_ANI_matrix_3STs" & "Subset_MLST_3STs". \
+Copies data from ANI & MLST worksheets (specified via input-arguments), but only includes data of genomes having an STs that occurs at least 3 times in the dataset.
+```
+$ python subset_min3STs.py [1] [2] [3]
+    [1] = Full path to Excel file with ANI matrix and MLST results
+    [2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa or ANI_matrix_reviewed
+    [3] = Worksheet with MLST results in Excel file [1] e.g. MLST or MLST_reviewed
+```
 
 ## STEP 5 - Clustering ANI values
 #### ANI_clustering.py
