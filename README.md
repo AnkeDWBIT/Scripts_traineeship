@@ -160,7 +160,8 @@ $ python subset_matrix.py [1] [2] [3] [4] ...
 ```
 #### subset_min3STs.py
 - In the Excel file, creates new worksheets "Subset_ANI_matrix_3STs" & "Subset_MLST_3STs". \
-Copies data from ANI & MLST worksheets (specified via input-arguments), but only includes data of genomes having an STs that occurs at least 3 times in the dataset.
+Copies data from ANI & MLST worksheets (specified via input-arguments), but only includes data of genomes having an STs that occurs at least 3 times in the dataset. \
+Copies these new worksheets to "ANI_excl_unknown" & "MLST_excl_unknown" & removes genomes having an unknown ST.
 ```
 $ python subset_min3STs.py [1] [2] [3]
 [1] = Full path to Excel file with ANI matrix and MLST results
