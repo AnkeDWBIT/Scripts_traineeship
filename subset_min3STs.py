@@ -47,7 +47,7 @@ genomes = []
 for value in ST_dict.values():
     genomes.extend(value)
 
-# STEP 3 : MAKE NEW WORKSHEETS IN THE EXCEL FILE WITH REDUCED DATA
+# STEP 3 : MAKE NEW WORKSHEETS IN THE EXCEL FILE WITH REDUCED DATA -> ONLY GENOMES WITH STs THAT OCCUR AT LEAST 3 TIMES
 ############################################################################################################
 # Make a new worksheet for the subset ANI matrix & MLST results
 ws_ANI_subset = wb.create_sheet("Subset_ANI_matrix_3STs")
@@ -95,9 +95,27 @@ for genome_pair in itertools.product(genomes, genomes):
     row_index_subset = subset_genome_row_indices[genome_pair[0]]
     col_index_subset = subset_genome_col_indices[genome_pair[1]]
     ws_ANI_subset.cell(row_index_subset, col_index_subset, value=ANI_value)
-    
 
+# STEP 4 : MAKE NEW WORKSHEETS IN THE EXCEL FILE WITH REDUCED DATA -> REMOVE GENOMES WITH UNKNOWN STs
+############################################################################################################
+# Copy the worksheets with the subset data
+ws_ANI_copy = wb.copy_worksheet(ws_ANI_subset)
+ws_MLST_copy = wb.copy_worksheet(ws_MLST_subset)
+# Rename the new worksheets
+ws_ANI_copy.title = "ANI_excl_unknown"
+ws_MLST_copy.title = "MLST_excl_unknown"
+# Store the row indeces of the genomes with Unknown STs
+unknown_STs = []
+for row in range(2, ws_MLST_copy.max_row + 1):
+    ST = ws_MLST_copy.cell(row=row, column=2).value
+    if ST == "Unknown":
+        unknown_STs.append(row)
+# Remove the rows (&columns) with Unknown STs from the ANI & MLST worksheets
+for row in unknown_STs:
+    ws_ANI_copy.delete_rows(row)
+    ws_ANI_copy.delete_cols(row)
+    ws_MLST_copy.delete_rows(row)
+    
 # Save & close the workbook
 wb.save(excel_file_path)
 wb.close()
-
