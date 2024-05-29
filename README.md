@@ -20,7 +20,7 @@ $ unzip ncbi_dataset.zip -d /home/guest/BIT11_Traineeship/Paeruginosa_genome_gbf
 
 ```
 ## STEP 1 - Quality analysis of WGS
-### 1.16S rRNA sequence analysis
+### 1. 16S rRNA sequence analysis
 
 #### 16SrRNAExtractor.py
   
@@ -116,7 +116,7 @@ $ python ANI_matrix_excel.py [1] [2] [3]
 [3] = Full path to directory with JSON files from MLST
 ```
 #### QC_ANI_matrix.py
-- Opens the Exce file and looks at worksheets with ANI matrix & MLST results (specified via input-arguments).
+- Opens the Excel file and looks at worksheets with ANI matrix & MLST results (specified via input-arguments).
 - Looks for genomes with average %identity <95% (indicative that the genome is a different species than rest of the genomes in the dataset).\
 Detected genomes and their average ANI value are added to "genomes_to_remove.txt".\
 ANI & MLST worksheets are copied to new worksheets named "ANI_matrix_reviewed" & "MLST_reviewed". \
@@ -128,6 +128,25 @@ $ python QC_ANI_matrix.py [1] [2] [3]
 [3] = Worksheet with MLST results in Excel file [1] e.g. MLST
 ```
 *! It is advised to use the "ANI_matrix_reviewed" & "MLST_reviewed" worksheets from now on !*
+
+#### QC_16Sseq_Blast.py
+- Makes output directory "05_BLAST" with subdirectories "blast_results" & "16S_rRNA_database" (location specified via input-argument). \
+Extracts 16S rRNA sequences from ".gbff" files of the genomes in "genomes_to_remove.txt" (locations specified via input-arguments). \
+Writes extracted sequences to "QC_rRNAs.fa" in the "05_BLAST/blast_results" directory. \
+Installs "16S_ribosomal_RNA" database in the "05_BLAST/16S_rRNA_database" directory. \
+Runs nblast on all sequences in "QC_rRNAs.fa" & saves output in "05_BLAST/blast_results", one file per sequence.
+- Dependency : the script requires BLAST+ to be installed. \
+For example, the tool can be installed in an already existing conda environment: \
+```
+$ conda install bioconda::blast
+```
+Make sure the conda environment is active when installin the tool & executing the script.
+```
+$ python QC_16Sseq_Blast.py [1] [2] [3]
+[1] = Full path to directory with .gbff files to extract 16S rRNA sequences from (e.g. /home/guest/BIT11_Traineeship/01_Paeruginosa_refseq_genomes/ncbi_dataset/data/)
+[2] = Full path to genomes_to_remove.txt file (holds genomes with avg ANI <95%)
+[3] = Full path where to make BLAST output directory, not including the BLAST output dir (e.g. /home/guest/BIT11_Traieeship/)
+```
 
 #### subset_matrix.py
 - In the Excel file, creates new worksheets "Subset_ANI_matrix" & "Subset_MLST_results". \
@@ -144,9 +163,9 @@ $ python subset_matrix.py [1] [2] [3] [4] ...
 Copies data from ANI & MLST worksheets (specified via input-arguments), but only includes data of genomes having an STs that occurs at least 3 times in the dataset.
 ```
 $ python subset_min3STs.py [1] [2] [3]
-    [1] = Full path to Excel file with ANI matrix and MLST results
-    [2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa or ANI_matrix_reviewed
-    [3] = Worksheet with MLST results in Excel file [1] e.g. MLST or MLST_reviewed
+[1] = Full path to Excel file with ANI matrix and MLST results
+[2] = Worksheet with ANI matrix in Excel file [1] e.g. Pseudomonas_aeruginosa or ANI_matrix_reviewed
+[3] = Worksheet with MLST results in Excel file [1] e.g. MLST or MLST_reviewed
 ```
 
 ## STEP 5 - Clustering ANI values
