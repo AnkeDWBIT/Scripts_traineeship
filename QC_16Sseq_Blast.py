@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Script to extract 16S rRNA sequences from .gbff files of genomes listed in the file "genomes_to_remove.txt" and write them to a file "QC_rRNAs.fa",
-# then installs the 16S_ribosomal_RNA databse in "05_BLAST_16S_rRNA_database" & runs BLAST on the sequences from "QC_rRNAs.fa" against the database,
+# then installs the 16S_ribosomal_RNA databse in "05_BLAST_16S_rRNA_database" (if not done yet) & runs BLAST on the sequences from "QC_rRNAs.fa" against the database,
 # results are saved in "05_BLAST/blast_results" directory, one file per sequence
 # Dependency : BLAST+ needs to be installed on the system (e.g. in a conda environment that is active when executing the script)
 import sys
@@ -8,6 +8,8 @@ import os
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord     
 import subprocess
+import openpyxl
+from openpyxl.utils import get_column_letter
 
 # STEP 1 : HANDLE COMMAND-LINE ARGUMENTS
 ############################################################################################################
@@ -32,24 +34,29 @@ blast_dir = sys.argv[3]
 # STEP 2 : Extract genomes from the "genomes_to_remove.txt" file & construct filenames of .gbff files to look for
 ############################################################################################################
 gbff_files = []
+genomes = []
 # Open the file with genomes to remove (location specified as input argument [2])
 with open(genomes_file, 'r') as file:
-    for line in file:
-        # Look for lines starting with "GCF_" (RefSeq identifiers)
-        if line.startswith("GCF_"):
-            # Extract the RefSeq ID out of the line
-            genome = line.split("\t")[0]
-            gbff_file = genome + ".gbff"
-            gbff_files.append(gbff_file)
+	for line in file:
+		# Look for lines starting with "GCF_" (RefSeq identifiers)
+		if line.startswith("GCF_"):
+			genome = line.split("\t")[0] # Extract the RefSeq ID out of the line
+			gbff_file = genome + ".gbff"
+			gbff_files.append(gbff_file)
+			genomes.append(genome)
 #print(gbff_files)
         
 # STEP 3 : MAKE OUTPUT DIRECTORIES
 ############################################################################################################
 # Make a new directory "05_BLAST" with subdirectories "blast_results" & "16S_rRNA_database" (location specified as input argument [3])
-path_results = os.path.join(blast_dir, "05_BLAST/blast_results/")
+# If the database is already installed, don't install it again
 path_db = os.path.join(blast_dir, "05_BLAST/16S_rRNA_database/")
+if path_db in os.listdir(blast_dir):
+	print("16S ribosomal RNA database already installed.")
+else:
+	os.makedirs(path_db, exist_ok=True)
+path_results = os.path.join(blast_dir, "05_BLAST/blast_results/")
 os.makedirs(path_results, exist_ok=True)
-os.makedirs(path_db, exist_ok=True)
 
 # STEP 4 : CREATE A FILE "QC_rRNAs.fa" WITH 16Ss rRNA SEQUENCES OF GENOMES FROM "genomes_to_remove.txt"
 ###########################################################################################################
@@ -97,12 +104,15 @@ else:
 
 # STEP 6 : RUN NCBI BLAST WITH THE SEQUENCES FROM "QC_rRNAs.fa"
 ###########################################################################################################
+# In the output folder, make an excel file for each genome
+for genome in genomes:
+	wb = openpyxl.Workbook()
+	wb.save(os.path.join(path_results,f"blast_{genome}.xlsx"))
+	wb.template = True
 # Open the file with the rRNA sequences and iterate over each sequence
 with open(os.path.join(path_results,"QC_rRNAs.fa"), "r") as file:
 	for record in SeqIO.parse(file, "fasta"):
-		print(f"Running BLAST for sequence ID: {record.id}")
-        # Make custom names for BLAST output files
-		output_file = os.path.join(path_results,f"blast_output_{record.id}.txt")
+		print(f"Running BLAST for sequence ID: {record.id}")	
         # Write the sequence to a temporary file
 		temp_input = os.path.join(path_results,f"temp_{record.id}.fasta")
 		with open(temp_input, "w") as temp_file:
@@ -116,15 +126,30 @@ with open(os.path.join(path_results,"QC_rRNAs.fa"), "r") as file:
         ]
         # Run blastn & capture the results
 		results = subprocess.run(blastn_cmd, capture_output=True, text=True)
-        # Write the header and BLAST results (output or error) to the output file
-		with open(output_file, "w") as out_file:
-			header = "query_id\tsubject_id\tpercent_identity\ttaxonomy_id\taccession\tscientific_name\tsubject_title\n"
-			out_file.write(header)
-			if results.stderr:
-				out_file.write(results.stderr)
-				print(f"Error: {results.stderr}")
-			else:
-				out_file.write(results.stdout)
-				print("Blast performed successfully.")
-        # Remove the temporary input file
-		subprocess.run(["rm", temp_input])
+		# Open the excel file with the genome name
+		for genome in genomes:
+			if genome in record.id:
+				output_file = os.path.join(path_results,f"blast_{genome}.xlsx")
+				# Make a new worksheet for the record.id
+				wb = openpyxl.load_workbook(output_file)
+				ws = wb.create_sheet(record.id)
+				# Write the header and BLAST results (output or error) to the output file
+				header = "query_id\tsubject_id\tpercent_identity\ttaxonomy_id\taccession\tscientific_name\tsubject_title\n"
+				ws.append(header.split("\t"))
+				if results.stderr:
+					ws.append(results.stderr.split("\n"))
+					print(f"Error: {results.stderr}")
+				else:
+					for line in results.stdout.split("\n"):
+						ws.append(line.split("\t"))
+				# Autofit the column width
+				for column_cells in ws.columns:
+					length = max(len(str(cell.value)) for cell in column_cells)
+					ws.column_dimensions[get_column_letter(column_cells[0].column)].width = length
+				# Remove empty sheet with name "Sheet"
+				if "Sheet" in wb.sheetnames:
+					del wb["Sheet"]
+				# Save & close the workbook
+				wb.save(output_file)
+				# Remove the temporary input file
+				subprocess.run(["rm", temp_input])
