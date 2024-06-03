@@ -1,6 +1,11 @@
 # Scripts_traineeship
 The Git repository named "Scripts_traineeship" contains all scripts I adapted or made during my traineeship for the ba-na-ba bioinformatics program (04/2024 - 06/2024). This README file describes the order in which the scripts can be used, what the script do and how they can be used with examples of command line options.
 
+## Dependencies
+Many script in the repository require some tools or packages to be installed. You can either use the pre-made conda environment below or make your own with the commands provided throughout this README.md file. \
+*This section is still under development* \
+*Add exported conda environment, what tools/packages it contains & how to install.*
+
 ## Input files
 Genomic fasta-files & gbff-files, can be downloaded using [NCBI Command Line Tools](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/download-and-install/).
 
@@ -39,7 +44,7 @@ $ python 16SrRNAExtractor.py [1]
 ### 2. Busco
 #### genomes_fasta_dir.py
 - In order to run Busco in batch mode, all fasta-files need to be in one directory. \
-The script looks in each subdirectory of the specified input directory for fast-files and copies them to the output directory (will be made if it does not exist yet).\
+The script looks in each subdirectory of the specified input directory for fast-files and copies them to the output directory (will be made if it does not exist yet).
 ```
 $ python genomes_fasta_dir.py [1] [2]
 [1] = Full path to input directory (= folder containing all subfolders with downloaded fasta-files)
@@ -97,8 +102,8 @@ $ fastANI --ql [1] --rl [2] -o [3] --matrix -t [4]
 ```
 $ bash MLST_batch_run.sh [1] [2] [3] [4]
 [1] Full path to folder with input files (fasta) to run MLST on (files can't be in subdirectories)
-[2] Specify the species (e.g. paeruginosa).\n
-[3] Full path to output folder (will create if it doens't exist yet).\n
+[2] Specify the species (e.g. paeruginosa).
+[3] Full path to output folder (will create if it doens't exist yet).
 [4] Create extended output (y/n)?";
 ```
 - Extended output includes:
@@ -133,14 +138,14 @@ $ python QC_ANI_matrix.py [1] [2] [3]
 - Makes output directory "05_BLAST" with subdirectories "blast_results" & "16S_rRNA_database" (location specified via input-argument). \
 Extracts 16S rRNA sequences from ".gbff" files of the genomes in "genomes_to_remove.txt" (locations specified via input-arguments). \
 Writes extracted sequences to "QC_rRNAs.fa" in the "05_BLAST/blast_results" directory. \
-Installs "16S_ribosomal_RNA" database in the "05_BLAST/16S_rRNA_database" directory. \
-Runs nblast on all sequences in "QC_rRNAs.fa" & saves output in "05_BLAST/blast_results", one file per sequence.
+Installs "16S_ribosomal_RNA" database in the "05_BLAST/16S_rRNA_database" directory (if not done already). \
+Runs blastn on all sequences in "QC_rRNAs.fa" & saves output in "05_BLAST/blast_results", one excel file per genome with  a worksheet per 16S sequence.
 - Dependency : the script requires BLAST+ to be installed. \
-For example, the tool can be installed in an already existing conda environment: \
+For example, the tool can be installed in an already existing conda environment:
 ```
 $ conda install bioconda::blast
 ```
-Make sure the conda environment is active when installin the tool & executing the script.
+Make sure the conda environment is active when installing the tool & executing the script.
 ```
 $ python QC_16Sseq_Blast.py [1] [2] [3]
 [1] = Full path to directory with .gbff files to extract 16S rRNA sequences from (e.g. /home/guest/BIT11_Traineeship/01_Paeruginosa_refseq_genomes/ncbi_dataset/data/)
@@ -187,7 +192,7 @@ $ python ANI_clustering.py [1] [2] [3] [4] ...
 - The [Comparing Partitions Website](http://www.comparingpartitions.info/index.php?link=Tool) can be used to line up the results of MLST analysis and Agglomerative clustering of the data. \
 It calculates values such as: \
 Simpson's Index of Diversity, to measure the discriminatory ability of typing systems &\
-Rand Index, to give the global congruence between two typing methods.
+Adjusted Rand Index, to give the global congruence between two typing methods.
 ### Visualization of ANI clusters
 - The [Correlation Analysis website](https://bioit.shinyapps.io/ManiR/) can be used to make heatmaps of the ANI matrix and use MLST results as metadata. \
 Since the Excel-file can be quite large, it is advised to only upload worksheets with a subset of the data (these can be constructed using the "subset_matrix.py" script). \
