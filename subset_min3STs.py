@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# Script to make new ANI & MLST excel worksheets ("Subset_ANI_matrix_3STs" & "Subset_MLST_3STs") 
-# The subset consists of genomes that have an ST that occurs at least 3 times in the dataset
+# Script to make worksheets "Subset_ANI_matrix_3STs" & "Subset_MLST_3STs" = only contains genomes with an ST that occurs >= 3 times in the dataset
+# also makes worksheets "ANI_excl_unknown" & "MLST_excl_unknown" = contains all genomes except genomes with an unknown ST
 from openpyxl import load_workbook
 import sys
 import itertools
@@ -54,10 +54,9 @@ ws_ANI_subset = wb.create_sheet("Subset_ANI_matrix_3STs")
 ws_MLST_subset = wb.create_sheet("Subset_MLST_3STs")
 # Write column headers to the new MLST worksheet
 ws_MLST_subset.append(["RefSeq ID", "ST"])
-"""
-ws_MLST_subset.cell(row=1, column=1, value="RefSeq ID")
-ws_MLST_subset.cell(row=1, column=2, value="ST")
-"""
+#ws_MLST_subset.cell(row=1, column=1, value="RefSeq ID")
+#ws_MLST_subset.cell(row=1, column=2, value="ST")
+
 # Write RefSeq identifiers from the genomes list to the new worksheets & write the STs to the ws_MLST_subset worksheet
 GCF_index = 0
 index = 2
@@ -99,23 +98,41 @@ for genome_pair in itertools.product(genomes, genomes):
 # STEP 4 : MAKE NEW WORKSHEETS IN THE EXCEL FILE WITH REDUCED DATA -> REMOVE GENOMES WITH UNKNOWN STs
 ############################################################################################################
 # Copy the worksheets with the subset data
-ws_ANI_copy = wb.copy_worksheet(ws_ANI_subset)
-ws_MLST_copy = wb.copy_worksheet(ws_MLST_subset)
+ws_ANI_copy = wb.copy_worksheet(ws_ANI)
+ws_MLST_copy = wb.copy_worksheet(ws_MLST)
 # Rename the new worksheets
 ws_ANI_copy.title = "ANI_excl_unknown"
 ws_MLST_copy.title = "MLST_excl_unknown"
-# Store the row indeces of the genomes with Unknown STs
-unknown_STs = []
+
+# REMOVE GENOMES FROM MLST WORKSHEET
+# Store the genoms with unknown STs
+unknown_rows_MLST = []
+unknown_genomes = []
 for row in range(2, ws_MLST_copy.max_row + 1):
     ST = ws_MLST_copy.cell(row=row, column=2).value
     if ST == "Unknown":
-        unknown_STs.append(row)
-# Remove the rows (&columns) with Unknown STs from the ANI & MLST worksheets
-for row in unknown_STs:
+        unknown_rows_MLST.append(row)
+        unknown_genomes.append(ws_MLST_copy.cell(row=row, column=1).value)
+# Reverse the list of row indeces to avoid shifting the rows & remove rows from the list
+unknown_rows_MLST.reverse()
+for row in unknown_rows_MLST:
+    ws_MLST_copy.delete_rows(row)
+
+# REMOVE GENOMES FROM ANI WORKSHEET
+# Make a list with ANI rows(=column) indeces to remove
+unknown_rowscols_ANI = []
+# Iterate through the rows of the ANI worksheet, if the value in column 1 matches a genome with an unknown ST, store the row index
+for row in range(2, ws_ANI_copy.max_row + 1):
+    genome = ws_ANI_copy.cell(row=row, column=1).value
+    if genome in unknown_genomes:
+        unknown_rowscols_ANI.append(row)
+        print(genome, unknown_rowscols_ANI)
+# Reverse the list of row/column indeces and remove those rows/columns
+unknown_rowscols_ANI.reverse()
+for row in unknown_rowscols_ANI:
     ws_ANI_copy.delete_rows(row)
     ws_ANI_copy.delete_cols(row)
-    ws_MLST_copy.delete_rows(row)
-    
+
 # Save & close the workbook
 wb.save(excel_file_path)
 wb.close()
