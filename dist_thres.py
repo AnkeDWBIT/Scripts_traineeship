@@ -44,9 +44,10 @@ def server(input, output, session):
             ui.update_select("select_MLST", choices=worksheets)
 
     @output
+    # Adds text to the page that shows the distance_threshold value and the selected worksheets
     @render.text
     def txt():
-        return f"Agglomerative clustering of ANI values with distance_threshold = {input.n()} \n Data retrieved from the Excel file on worksheet '{input.select()}'"
+        return f"Agglomerative clustering of ANI values with distance_threshold = {input.n()} \n Data retrieved from the Excel file on worksheets '{input.select_ANI()}' & '{input.select_MLST()}'"
 
 # Create the Shiny app
 app = App(app_ui, server)
