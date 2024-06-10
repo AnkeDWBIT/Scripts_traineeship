@@ -31,7 +31,9 @@ if [ ! -d "$outputFolder" ]; then
     mkdir -p "$outputFolder"
     echo "Output folder created."
 else
-    echo "Output folder already exists."
+    # If the folder already exists, stop the script
+    echo "Output folder already exists. \n Please remove the folder or change the output folder name to avoid overwriting."
+    exit 1
 fi
 
 
