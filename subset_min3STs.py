@@ -95,14 +95,17 @@ for genome_pair in itertools.product(genomes, genomes):
     col_index_subset = subset_genome_col_indices[genome_pair[1]]
     ws_ANI_subset.cell(row_index_subset, col_index_subset, value=ANI_value)
 
+# Message when the subset worksheets have been created
+print("The subset worksheets 'Subset_ANI_matrix_3STs' & 'Subset_MLST_3STs' have been created. \n They contain only genomes with STs that occur at least 3 times in the dataset.")
+
 # STEP 4 : MAKE NEW WORKSHEETS IN THE EXCEL FILE WITH REDUCED DATA -> REMOVE GENOMES WITH UNKNOWN STs
 ############################################################################################################
 # Copy the worksheets with the subset data
 ws_ANI_copy = wb.copy_worksheet(ws_ANI)
 ws_MLST_copy = wb.copy_worksheet(ws_MLST)
 # Rename the new worksheets
-ws_ANI_copy.title = "ANI_excl_unknown"
-ws_MLST_copy.title = "MLST_excl_unknown"
+ws_ANI_copy.title = "ANI_unknown"
+ws_MLST_copy.title = "MLST_unknown"
 
 # REMOVE GENOMES FROM MLST WORKSHEET
 # Store the genoms with unknown STs
@@ -126,7 +129,7 @@ for row in range(2, ws_ANI_copy.max_row + 1):
     genome = ws_ANI_copy.cell(row=row, column=1).value
     if genome in unknown_genomes:
         unknown_rowscols_ANI.append(row)
-        print(genome, unknown_rowscols_ANI)
+        
 # Reverse the list of row/column indeces and remove those rows/columns
 unknown_rowscols_ANI.reverse()
 for row in unknown_rowscols_ANI:
@@ -136,3 +139,6 @@ for row in unknown_rowscols_ANI:
 # Save & close the workbook
 wb.save(excel_file_path)
 wb.close()
+
+# Message when the subset worksheets have been created
+print("The subset worksheets 'ANI_unknown' & 'MLST_unknown' have been created. \n They contain all genomes except genomes with an unknown ST.")
