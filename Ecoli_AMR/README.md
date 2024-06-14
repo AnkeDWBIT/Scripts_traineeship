@@ -32,10 +32,14 @@ $ python tsv_to_excel.py [1]
 ```
 
 #### AMRFinderPlus.sh
-Script that loops through an input directory and copies tsv-files into new files with csv-format. New files have their original name, with "_csv" as suffix.
+Script to loop through an input directory and run AMRFinderPlus serially for all fasta-files.
 ```
-$ python tsv_to_csv.py [1]
-[1] = Full path to input directory (=folder containing only tsv-files)
+$ bash AMRFinderPlus.sh [1]
+[1] = Full path to input directory with fasta-files.
 ```
-
-
+#### RGI_CARD.sh
+Script that loops through an input directory and executes RGI CARD on all fasta-files.
+```
+$ bash RGI_CARD.sh[1]
+[1] = Full path to input directory with fasta-files.
+```
