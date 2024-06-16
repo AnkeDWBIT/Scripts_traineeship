@@ -51,7 +51,7 @@ for isolate in $(ls ${inputFolder}/*.fasta);
         base=$(basename $isolate)
         base="${base%.*}"
         # Run RGI CARD (installed as Docker)
-        docker run -v "$inputFolder":/data quay.io/biocontainers/rgi:6.0.3--pyha8f3691_0 rgi main -i "/data/${base}.fasta" -o "/data/RGI_output/${base}_output" --clean --include-loose
+        docker run -v "$inputFolder":/data quay.io/biocontainers/rgi:6.0.3--pyha8f3691_0 rgi main -i "/data/${base}.fasta" -o "/data/RGI_output/${base}_output" --include_loose --clean 
         # Print message when RGI is run for a file
         echo "RGI CARD run for $isolate"
     done
