@@ -31,11 +31,13 @@ $ python tsv_to_excel.py [1]
 [1] = Full path to input directory (=folder containing only tsv-files)
 ```
 
-#### AMRFinderPlus.sh
-Script to loop through an input directory and run AMRFinderPlus serially for all fasta-files.
+#### AMRFinder_results.py
+! DRAFT VERSION  - script still has some errors !
+Script to write results of AMRFinderPlus to an Excel-file
 ```
-$ bash AMRFinderPlus.sh [1]
-[1] = Full path to input directory with fasta-files.
+$ python AMRFinder_results.py [1] [2]
+[1] = Full path to directory with AMRFinderPlus results
+[2] = Full path to Excel file with AMR tools summary
 ```
 #### RGI_CARD.sh
 Script that loops through an input directory and executes RGI CARD on all fasta-files.
