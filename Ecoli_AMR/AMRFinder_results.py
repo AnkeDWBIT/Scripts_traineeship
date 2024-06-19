@@ -47,6 +47,10 @@ for file in os.listdir(input_dir):
     # Retrieve the genome name by removing "_output.xlsx" from the filenmae
     genome = file.replace("_output.xlsx" ,"")
 
+    # Initialize flags for trimethoprim and sulfonamide detection
+    found_trimethoprim = False
+    found_sulfonamide = False
+
     # Read each line of the file
     for row in range(2, ws.max_row + 1):
         coverage = ws.cell(row=row, column=16).value
@@ -57,7 +61,9 @@ for file in os.listdir(input_dir):
             ab_class = ws.cell(row=row,column=11).value    
             ab_subclass = ws.cell(row=row,column=12).value
             #print(f"{file} : Gene = {AMR_gene}, Class = {ab_class}, Subclass = {ab_subclass}")
-
+            if "FLUOROQUINOLONE" in ab_class and "FLUOROQUINOLONE" in ab_subclass:
+                print(file, AMR_gene, ab_class, ab_subclass)
+"""
             ###AMINOGLYCOSIDE###
             if  "AMINOGLYCOSIDE" in ab_class and  "AMINOGLYCOSIDE" in ab_subclass:
                 # col 6 (amikacine) & 72 (tobramycin)
@@ -215,22 +221,30 @@ for file in os.listdir(input_dir):
                 gene_output_row += 1 
                 #print(f"{file}: Trimethroprim_sulfamethoxazole resistance with gene {AMR_gene}")
             if "TRIMETHOPRIM" in ab_class and "TRIMETHOPRIM" in ab_subclass:
-                # col 78 (Trimethroprim_sulfamethoxazole)
-                ws_summary.cell(row=output_row, column=78, value="R")
+                # Make a flag to check if both trimethoprim and sulfonamide resistance is detected and store the row number for later
+                found_trimethoprim = True
+                tri_sulf_row = output_row
                 ws_genes.cell(row=gene_output_row, column=2, value=AMR_gene)
                 ws_genes.cell(row=gene_output_row, column=3, value="TRIMETHOPRIM")
                 ws_genes.cell(row=gene_output_row, column=4, value="TRIMETHOPRIM")
                 gene_output_row += 1 
                 #print(f"{file}: Trimethroprim resistance with gene {AMR_gene}")
             if "SULFONAMIDE" in ab_class and "SULFONAMIDE" in ab_subclass:
-                # col 78 (Trimethroprim_sulfamethoxazole)
-                ws_summary.cell(row=output_row, column=78, value="R")
+                # Make a flag to check if both trimethoprim and sulfonamide resistance is detected and store the row number for later
+                found_sulfonamide = True
+                tri_sulf_row = output_row
                 ws_genes.cell(row=gene_output_row, column=2, value=AMR_gene)
                 ws_genes.cell(row=gene_output_row, column=3, value="SULFONAMIDE")
                 ws_genes.cell(row=gene_output_row, column=4, value="SULFONAMIDE")
                 gene_output_row += 1 
                 #print(f"{file}: Sulfamethoxazole resistance with gene {AMR_gene}")
 
+    # In one input file or genome: if both trimethoprim and sulfonamide AMR genes are detected, write R in the summary sheet for Trimethroprim_sulfamethoxazole
+    if found_trimethoprim == True and found_sulfonamide== True:
+        # col 78 (Trimethroprim_sulfamethoxazole)
+        ws_summary.cell(row=tri_sulf_row, column=78, value="R")
+
+    # Increase the row number for the next genome
     #print(output_row)
     output_row +=1 
 
@@ -249,3 +263,4 @@ for row in range(ws_genes.max_row, 2, -1):  # Start from the last row and move u
 # Save & close the workbook with summary results of AMRFinderPlus
 wb_summary.save(excel_path)
 wb_summary.close()
+"""
